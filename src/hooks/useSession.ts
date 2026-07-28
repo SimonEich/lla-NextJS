@@ -9,12 +9,17 @@ import { buildAnswerArray } from "@/utils/random";
 import { MultiData } from "@/types/session";
 import { Word } from "@/data/words";
 
+const REPEAT_COOLDOWN = 5;
+
 // In-memory cache — survives re-renders, cleared on full page reload
 const cache = {
   progress: null as Record<string, WordProgress> | null,
   words: null as Word[] | null,
   wordMap: null as Map<string, Word> | null,
   maxStackSize: 30,
+  // Most recently asked word ids, most recent last — used so a word only
+  // reappears after at least REPEAT_COOLDOWN other words have been asked.
+  history: [] as string[],
 };
 
 async function ensureLoaded() {
@@ -93,11 +98,21 @@ export function useSession(options: Options = {}) {
 
       if (poolData.length === 0) return;
 
-      // Pick correct word from pool, distractors from all active
-      const correctIdx = Math.floor(Math.random() * poolData.length);
-      const chosenWord = poolData[correctIdx];
+      // Pick correct word from pool, but not one asked in the last
+      // REPEAT_COOLDOWN rounds — shrink the window if the pool is too
+      // small to honor it fully rather than stalling the session.
+      const cooldownWindow = Math.max(0, Math.min(REPEAT_COOLDOWN, poolData.length - 1));
+      const banned = new Set(cooldownWindow > 0 ? cache.history.slice(-cooldownWindow) : []);
+      const candidates = poolData.filter((w) => !banned.has(w.id));
+      const pickPool = candidates.length > 0 ? candidates : poolData;
+
+      const correctIdx = Math.floor(Math.random() * pickPool.length);
+      const chosenWord = pickPool[correctIdx];
       const chosenProgress = pool.find((wp) => wp.wordId === chosenWord.id)!;
       const sentenceIndex = chosenProgress.sentenceIndex % chosenWord.sentences.length;
+
+      cache.history.push(chosenWord.id);
+      if (cache.history.length > 50) cache.history = cache.history.slice(-50);
 
       // Pick 2 distractors from all active (different from correct)
       const distractorPool = allActiveData.filter((w) => w.id !== chosenWord.id);

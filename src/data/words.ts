@@ -2,8 +2,7 @@ export type WordKind = 'verb' | 'noun' | 'adjective' | 'adverb' | 'prep' | 'phra
 export type Sentence = { native: string; target: string; target_word_form: string; pers_pron_form?: string; };
 export type Word = { id: string; kind: WordKind; gender?: 'm' | 'f' | 'n'; native: string; target: string; sentences: Sentence[]; };
 
-
-export const words: Word[] = [
+const wordsChunk0: Word[] = [
   { id: 'v1', kind: 'verb', native: 'sein (dauerhaft)', target: 'ser',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich bin Arzt von Beruf.', target: 'Yo soy médico de profesión.', target_word_form: 'soy' },
@@ -2504,6 +2503,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie beauftragen Spezialisten.', target: 'Ellos contratan especialistas.', target_word_form: 'contratan' },
     ],
   },
+];
+
+const wordsChunk1: Word[] = [
   { id: 'v251', kind: 'verb', native: 'protestieren', target: 'protestar',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich protestiere gegen Ungerechtigkeit.', target: 'Yo protesto contra la injusticia.', target_word_form: 'protesto' },
@@ -5004,6 +5006,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie bekommen kostenlose Dienste.', target: 'Ellos reciben servicios gratuitos.', target_word_form: 'gratuitos' },
     ],
   },
+];
+
+const wordsChunk2: Word[] = [
   { id: 'adv501', kind: 'adverb', native: 'sehr', target: 'muy',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich bin sehr müde.', target: 'Yo estoy muy cansado.', target_word_form: 'muy' },
@@ -7504,6 +7509,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie finden einen Ergebnis / Resultat auf der Arbeit sehr interessant.', target: 'Ellos encuentran un resultado en el trabajo muy interesante.', target_word_form: 'resultado' },
     ],
   },
+];
+
+const wordsChunk3: Word[] = [
   { id: 'n751', kind: 'noun', gender: 'm', native: 'Projekt', target: 'proyecto',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich kenne einen Projekt auf der Arbeit gut.', target: 'Yo conozco un proyecto en el trabajo bien.', target_word_form: 'proyecto' },
@@ -10004,6 +10012,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie wollen den Zukunft.', target: 'Ellos quieren el futuro.', target_word_form: 'futuro' },
     ],
   },
+];
+
+const wordsChunk4: Word[] = [
   { id: 'n1001', kind: 'noun', gender: 'm', native: 'Vergangenheit', target: 'pasado',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich habe einen Vergangenheit heute.', target: 'Yo tengo un pasado hoy.', target_word_form: 'pasado' },
@@ -12504,6 +12515,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie sehen den Koala oft dort.', target: 'Ellos ven el koala a menudo allí.', target_word_form: 'koala' },
     ],
   },
+];
+
+const wordsChunk5: Word[] = [
   { id: 'n1251', kind: 'noun', gender: 'm', native: 'Kamel', target: 'camello',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich suche den Kamel oft hier.', target: 'Yo busco el camello a menudo aquí.', target_word_form: 'camello' },
@@ -15004,6 +15018,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie kaufen eine Cybersicherheit in der Stadt im Laden.', target: 'Ellos compran una ciberseguridad en la ciudad en la tienda.', target_word_form: 'ciberseguridad' },
     ],
   },
+];
+
+const wordsChunk6: Word[] = [
   { id: 'n1501', kind: 'noun', gender: 'm', native: 'Arbeit/Job', target: 'trabajo',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich brauche einen Arbeit/Job in der Stadt dringend.', target: 'Yo necesito un trabajo en la ciudad urgentemente.', target_word_form: 'trabajo' },
@@ -17504,6 +17521,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie finden den Kreislaufsystem zum ersten Mal sehr interessant.', target: 'Ellos encuentran el sistema circulatorio por primera vez muy interesante.', target_word_form: 'sistema circulatorio' },
     ],
   },
+];
+
+const wordsChunk7: Word[] = [
   { id: 'n1751', kind: 'noun', gender: 'f', native: 'Erbschaft / Erbe', target: 'herencia',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich kenne die Erbschaft / Erbe zum ersten Mal gut.', target: 'Yo conozco la herencia por primera vez bien.', target_word_form: 'herencia' },
@@ -20004,6 +20024,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie wollen einen Friedensabkommen gerne.', target: 'Ellos quieren un acuerdo de paz con gusto.', target_word_form: 'acuerdo de paz' },
     ],
   },
+];
+
+const wordsChunk8: Word[] = [
   { id: 'n2001', kind: 'noun', gender: 'm', native: 'Zuflucht', target: 'refugio',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich habe den Zuflucht gerne.', target: 'Yo tengo el refugio con gusto.', target_word_form: 'refugio' },
@@ -22504,6 +22527,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie sehen einen Wandern im Park dort.', target: 'Ellos ven un senderismo en el parque allí.', target_word_form: 'senderismo' },
     ],
   },
+];
+
+const wordsChunk9: Word[] = [
   { id: 'n2251', kind: 'noun', gender: 'm', native: 'Surfen', target: 'surf',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich suche einen Surfen im Park hier.', target: 'Yo busco un surf en el parque aquí.', target_word_form: 'surf' },
@@ -25004,6 +25030,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie kaufen den Klimawandel für die Familie im Laden.', target: 'Ellos compran el cambio climático para la familia en la tienda.', target_word_form: 'cambio climático' },
     ],
   },
+];
+
+const wordsChunk10: Word[] = [
   { id: 'n2501', kind: 'noun', gender: 'f', native: 'erneuerbare Energie', target: 'energía renovable',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich brauche die erneuerbare Energie für die Familie dringend.', target: 'Yo necesito la energía renovable para la familia urgentemente.', target_word_form: 'energía renovable' },
@@ -27504,6 +27533,9 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie finden ein Bakterium täglich sehr interessant.', target: 'Ellos encuentran un bacteria a diario muy interesante.', target_word_form: 'bacteria' },
     ],
   },
+];
+
+const wordsChunk11: Word[] = [
   { id: 'n2751', kind: 'noun', gender: 'n', native: 'Antibiotikum', target: 'antibiótico',
     sentences: [
       { pers_pron_form: 'yo', native: 'Ich kenne ein Antibiotikum täglich gut.', target: 'Yo conozco un antibiótico a diario bien.', target_word_form: 'antibiótico' },
@@ -30004,4 +30036,19 @@ export const words: Word[] = [
       { pers_pron_form: 'ellos', native: 'Sie wollen die Melodie manchmal.', target: 'Ellos quieren la melodía a veces.', target_word_form: 'melodía' },
     ],
   },
+];
+
+export const words: Word[] = [
+  ...wordsChunk0,
+  ...wordsChunk1,
+  ...wordsChunk2,
+  ...wordsChunk3,
+  ...wordsChunk4,
+  ...wordsChunk5,
+  ...wordsChunk6,
+  ...wordsChunk7,
+  ...wordsChunk8,
+  ...wordsChunk9,
+  ...wordsChunk10,
+  ...wordsChunk11,
 ];

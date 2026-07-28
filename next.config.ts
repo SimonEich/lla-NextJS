@@ -7,6 +7,10 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === "development",
   cacheOnNavigation: true,
   reloadOnOnline: true,
+  // The bundled words dataset (3000 words × 6 sentences) produces a JS chunk
+  // north of 3MB — well past Workbox's 2MB default precache cutoff. Offline
+  // mode is the whole point here, so make sure it actually gets precached.
+  maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
 });
 
 const nextConfig: NextConfig = {
