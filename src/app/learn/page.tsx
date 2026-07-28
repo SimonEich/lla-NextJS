@@ -9,7 +9,8 @@ import { useSession } from "@/hooks/useSession";
 type Phase = "question" | "feedback";
 
 export default function LearnScreen() {
-  const { data, activeCount, swipeRight, swipeUp, swipeLeft, swipeDown } = useSession();
+  const { data, activeCount, swipeRight, swipeUp, swipeLeft, swipeDown, jumpToLevel5 } =
+    useSession();
   const [phase, setPhase] = useState<Phase>("question");
   const [isCorrect, setIsCorrect] = useState(false);
 
@@ -41,7 +42,12 @@ export default function LearnScreen() {
           onSwipeDown={() => handleSwipe(swipeDown)}
         />
       ) : (
-        <CardScreen data={data} onAnswer={handleAnswer} activeCount={activeCount} />
+        <CardScreen
+          data={data}
+          onAnswer={handleAnswer}
+          activeCount={activeCount}
+          onKnown={jumpToLevel5}
+        />
       )}
     </div>
   );

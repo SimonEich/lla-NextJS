@@ -8,9 +8,10 @@ type Props = {
   data: MultiData;
   onAnswer: (correct: boolean) => void;
   activeCount: number;
+  onKnown?: () => void;
 };
 
-export default function CardScreen({ data, onAnswer, activeCount }: Props) {
+export default function CardScreen({ data, onAnswer, activeCount, onKnown }: Props) {
   const { level, correctCount } = data.progress;
 
   const levelProps = { data, onAnswer };
@@ -41,6 +42,17 @@ export default function CardScreen({ data, onAnswer, activeCount }: Props) {
           ))}
         </div>
       </div>
+      {onKnown && level < 5 && (
+        <div className="flex justify-end px-6 pb-1">
+          <button
+            type="button"
+            onClick={onKnown}
+            className="rounded-full border-[1.5px] border-border bg-white px-3 py-1 text-xs font-semibold text-muted"
+          >
+            Kenne ich schon ⏩
+          </button>
+        </div>
+      )}
       {LevelNode}
     </div>
   );

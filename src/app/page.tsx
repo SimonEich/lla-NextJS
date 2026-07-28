@@ -108,6 +108,14 @@ export default function HomeScreen() {
           </button>
         )}
 
+        <button
+          type="button"
+          onClick={() => router.push("/words")}
+          className="rounded-[18px] border-[1.5px] border-border bg-white py-4 text-base font-semibold text-ink"
+        >
+          Alle Wörter durchsuchen
+        </button>
+
         <div className="mt-1 flex items-center justify-center">
           <p className="text-xs text-[#ccc]">{stats?.totalAnswers ?? 0} Antworten gesamt</p>
         </div>

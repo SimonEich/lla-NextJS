@@ -22,11 +22,31 @@ const cache = {
   history: [] as string[],
 };
 
+// Call after writing to progressRepo from outside this hook (e.g. the word
+// list's "mark as known" toggle) so the next session picks up the change
+// instead of working off a stale in-memory snapshot.
+export function invalidateProgressCache() {
+  cache.progress = null;
+  cache.history = [];
+}
+
 async function ensureLoaded() {
   if (!cache.progress) {
     cache.progress = await progressRepo.load();
     const settings = await settingsService.load();
     cache.maxStackSize = settings.maxStackSize;
+
+    // Backfill review scheduling for words mastered before spaced
+    // repetition existed (or marked "known" directly), so they don't get
+    // stuck out of rotation forever.
+    let backfilled = false;
+    for (const wp of Object.values(cache.progress)) {
+      if (wp.state === "mastered" && wp.nextReviewAt === undefined) {
+        cache.progress[wp.wordId] = { ...wp, ...progressService.scheduleReview(1) };
+        backfilled = true;
+      }
+    }
+    if (backfilled) progressRepo.save(cache.progress);
   }
   if (!cache.words) {
     cache.words = await wordsRepo.getAll();
@@ -70,31 +90,35 @@ export function useSession(options: Options = {}) {
       const progress = cache.progress!;
       const wordMap = cache.wordMap!;
 
-      let pool = progressService.getActive(progress);
+      const activeList = progressService.getActive(progress);
+      // Mastered words whose review date has arrived resurface alongside
+      // the active stack in a normal learning session.
+      const dueReviews = difficultOnly ? [] : progressService.getDueReviews(progress);
+
+      let pool: WordProgress[];
       if (difficultOnly) {
-        pool = pool.filter((wp) => wp.difficult);
+        pool = activeList.filter((wp) => wp.difficult);
         if (pool.length === 0) {
           if (isMounted.current) setEmpty(true);
           return;
         }
+      } else {
+        pool = [...activeList, ...dueReviews];
       }
 
-      if (pool.length < 3) {
-        const allActive = progressService.getActive(progress);
-        if (allActive.length < 3) {
-          console.warn("[useSession] Not enough active words.");
-          return;
-        }
+      const eligible = [...activeList, ...dueReviews];
+      if (pool.length < 3 && eligible.length < 3) {
+        console.warn("[useSession] Not enough active words.");
+        return;
       }
 
-      const allActive = progressService.getActive(progress);
-      const allActiveData = allActive
+      const eligibleData = eligible
         .map((wp) => wordMap.get(wp.wordId))
         .filter((w): w is Word => !!w);
 
       const poolData = difficultOnly
         ? pool.map((wp) => wordMap.get(wp.wordId)).filter((w): w is Word => !!w)
-        : allActiveData;
+        : eligibleData;
 
       if (poolData.length === 0) return;
 
@@ -114,8 +138,8 @@ export function useSession(options: Options = {}) {
       cache.history.push(chosenWord.id);
       if (cache.history.length > 50) cache.history = cache.history.slice(-50);
 
-      // Pick 2 distractors from all active (different from correct)
-      const distractorPool = allActiveData.filter((w) => w.id !== chosenWord.id);
+      // Pick 2 distractors from the eligible pool (different from correct)
+      const distractorPool = eligibleData.filter((w) => w.id !== chosenWord.id);
       const d1 = distractorPool[Math.floor(Math.random() * distractorPool.length)];
       const d2Candidates = distractorPool.filter((w) => w.id !== d1?.id);
       const d2 = d2Candidates[Math.floor(Math.random() * d2Candidates.length)];
@@ -126,7 +150,7 @@ export function useSession(options: Options = {}) {
 
       if (isMounted.current) {
         setEmpty(false);
-        setActiveCount(allActiveData.length);
+        setActiveCount(activeList.length);
         setData({
           word: chosenWord,
           sentence: chosenWord.sentences[sentenceIndex],
@@ -147,8 +171,11 @@ export function useSession(options: Options = {}) {
       const updated = updater(oldWp);
       cache.progress = { ...cache.progress, [updated.wordId]: updated };
 
-      // Add a new word when leveling up (up to maxStackSize)
-      const didLevelUp = updated.level > oldWp.level || updated.state === "mastered";
+      // Add a new word when leveling up (up to maxStackSize) — but only for
+      // a genuinely NEW mastery, not every time an already-mastered review
+      // word gets answered again.
+      const newlyMastered = updated.state === "mastered" && oldWp.state !== "mastered";
+      const didLevelUp = updated.level > oldWp.level || newlyMastered;
       if (didLevelUp && cache.words) {
         const currentActive = progressService.getActive(cache.progress).length;
         if (currentActive < cache.maxStackSize) {
@@ -183,6 +210,20 @@ export function useSession(options: Options = {}) {
     () => applyAndAdvance(progressService.markDifficult),
     [applyAndAdvance]
   );
+  const jumpToLevel5 = useCallback(
+    () => applyAndAdvance(progressService.jumpToLevel5),
+    [applyAndAdvance]
+  );
 
-  return { runSession, swipeRight, swipeUp, swipeLeft, swipeDown, data, activeCount, empty };
+  return {
+    runSession,
+    swipeRight,
+    swipeUp,
+    swipeLeft,
+    swipeDown,
+    jumpToLevel5,
+    data,
+    activeCount,
+    empty,
+  };
 }

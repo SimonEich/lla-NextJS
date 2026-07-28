@@ -36,9 +36,19 @@ npx serve out
   unaffected by that swap.
 - **Spaced repetition engine**: `src/services/progressService.ts` (pure state
   transitions per swipe) + `src/hooks/useSession.ts` (session/session cache,
-  word activation, stack growth).
+  word activation, stack growth). Mastered words (whether reached through
+  practice, the "Kenne ich schon" quick-skip, or `/words`) get scheduled for
+  review and resurface in normal learning sessions once due.
 - **Levels**: `src/components/levels/*` — multiple choice (L1–2), fill-in-the-
   blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5).
+- **Words dataset**: `src/data/words.ts` is the hand-edited source (typed,
+  split into chunks so `tsc` can still check a 3000-entry literal). It is
+  **not** imported by the app at runtime — `predev`/`prebuild` run
+  `scripts/generate-words-json.ts`, which generates `public/words.json` from
+  it. `localWordsRepository` fetches that JSON lazily instead of bundling the
+  ~3MB array into every route's JS. If you edit `words.ts`, just re-run `npm
+  run dev`/`build` (or `npx tsx scripts/generate-words-json.ts` directly) to
+  regenerate it — `public/words.json` is gitignored.
 
 ## PWA / offline
 

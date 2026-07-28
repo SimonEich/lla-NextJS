@@ -11,9 +11,8 @@ type Phase = "question" | "feedback";
 
 export default function DifficultScreen() {
   const router = useRouter();
-  const { data, activeCount, empty, swipeRight, swipeUp, swipeLeft, swipeDown } = useSession({
-    difficultOnly: true,
-  });
+  const { data, activeCount, empty, swipeRight, swipeUp, swipeLeft, swipeDown, jumpToLevel5 } =
+    useSession({ difficultOnly: true });
   const [phase, setPhase] = useState<Phase>("question");
   const [isCorrect, setIsCorrect] = useState(false);
 
@@ -58,7 +57,12 @@ export default function DifficultScreen() {
           onSwipeDown={() => handleSwipe(swipeDown)}
         />
       ) : (
-        <CardScreen data={data} onAnswer={handleAnswer} activeCount={activeCount} />
+        <CardScreen
+          data={data}
+          onAnswer={handleAnswer}
+          activeCount={activeCount}
+          onKnown={jumpToLevel5}
+        />
       )}
     </div>
   );

@@ -23,6 +23,9 @@
 /public/swe-worker-*.js
 /public/swe-worker-*.js.map
 
+# generated from src/data/words.ts by predev/prebuild (scripts/generate-words-json.ts)
+/public/words.json
+
 # production
 /build
 

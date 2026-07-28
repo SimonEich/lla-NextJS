@@ -38,7 +38,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className="h-full antialiased">
-      <body className="min-h-dvh-safe flex flex-col bg-app-bg">
+      {/* suppressHydrationWarning: Next's dev-mode overlay injects a
+          style={{isolation:"isolate"}} on <body> after hydration for its own
+          stacking context — harmless, dev-only, and absent in production. */}
+      <body className="min-h-dvh-safe flex flex-col bg-app-bg" suppressHydrationWarning>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col bg-app-bg shadow-[0_0_40px_rgba(0,0,0,0.06)]">
           <OfflineIndicator />
           {children}
