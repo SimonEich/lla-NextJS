@@ -47,9 +47,11 @@ export function FreeInput({ data, onAnswer }: Props) {
     setMicError(null);
     start(
       (transcript) => {
+        // Fill the field instead of auto-submitting — the user can
+        // review/correct what was heard before checking it, same as if
+        // they'd typed it themselves.
         const cleaned = transcript.replace(/[.,!?¡¿]+$/g, "").trim();
         setInput(cleaned);
-        submitAnswer(cleaned);
       },
       (error) => {
         setMicError(MIC_ERROR_MESSAGES[error] ?? "Spracherkennung fehlgeschlagen");
