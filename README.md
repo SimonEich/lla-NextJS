@@ -40,7 +40,13 @@ npx serve out
   practice, the "Kenne ich schon" quick-skip, or `/words`) get scheduled for
   review and resurface in normal learning sessions once due.
 - **Levels**: `src/components/levels/*` — multiple choice (L1–2), fill-in-the-
-  blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5).
+  blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5). L5 also
+  offers a "🎤 Sprechen" voice-input option (`src/hooks/useSpeechRecognition.ts`,
+  Web Speech API) that transcribes the spoken answer into the same text field
+  and auto-submits it — only rendered when the browser actually supports
+  `SpeechRecognition`/`webkitSpeechRecognition` (no Firefox support, spotty on
+  iOS Safari), and fails gracefully (denied mic permission, no speech, etc.)
+  without affecting the text-input path.
 - **Words dataset**: `src/data/words.ts` is the hand-edited source (typed,
   split into chunks so `tsc` can still check a 3000-entry literal). It is
   **not** imported by the app at runtime — `predev`/`prebuild` run
