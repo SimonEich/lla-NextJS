@@ -12,7 +12,8 @@ type Props = {
 };
 
 export default function CardScreen({ data, onAnswer, activeCount, onKnown }: Props) {
-  const { level, correctCount } = data.progress;
+  const { level, correctCount, formsDone } = data.progress;
+  const { verbForm } = data;
 
   const levelProps = { data, onAnswer };
   const LevelNode =
@@ -33,14 +34,20 @@ export default function CardScreen({ data, onAnswer, activeCount, onKnown }: Pro
           <p className="text-sm font-semibold text-muted">Level {level}</p>
           <p className="mt-0.5 text-[11px] text-muted-3">{activeCount} Wörter im Stapel</p>
         </div>
-        <div className="flex gap-1.5">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className={`h-2.5 w-2.5 rounded-full ${i < correctCount ? "bg-brand" : "bg-[#ddd]"}`}
-            />
-          ))}
-        </div>
+        {verbForm ? (
+          <p className="text-xs font-semibold text-muted-2">
+            {(formsDone ?? []).length}/{verbForm.requiredForms.length} Formen
+          </p>
+        ) : (
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={`h-2.5 w-2.5 rounded-full ${i < correctCount ? "bg-brand" : "bg-[#ddd]"}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
       {onKnown && level < 5 && (
         <div className="flex justify-end px-6 pb-1">

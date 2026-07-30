@@ -1,13 +1,46 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { progressService, WordProgress } from "@/services/progressService";
+import {
+  progressService,
+  WordProgress,
+  VerbFormContext,
+  INFINITIVE_FORM,
+} from "@/services/progressService";
 import { progressRepo, wordsRepo } from "@/repositories";
 import { statsService } from "@/services/statsService";
 import { settingsService } from "@/services/settingsService";
 import { buildAnswerArray } from "@/utils/random";
 import { MultiData } from "@/types/session";
-import { Word } from "@/data/words";
+import { Word, Sentence } from "@/data/words";
+
+// For a verb still climbing to mastery at level 5, picks which required
+// form (infinitive or a person) to test next — rotating fairly through
+// whatever's still outstanding — and the sentence to display alongside it.
+function pickVerbForm(
+  word: Word,
+  wp: WordProgress
+): { verbForm: VerbFormContext; sentence: Sentence } {
+  const requiredForms = progressService.getRequiredVerbForms(word);
+  const done = wp.formsDone ?? [];
+  const remaining = requiredForms.filter((f) => !done.includes(f));
+  const pool = remaining.length > 0 ? remaining : requiredForms;
+  const label = pool[wp.sentenceIndex % pool.length];
+
+  if (label === INFINITIVE_FORM) {
+    // No single person-conjugated sentence fits "the infinitive" — show an
+    // example sentence for flavor/context, but strip its person label so
+    // the feedback screen doesn't hint at the wrong form.
+    const sentence: Sentence = { ...word.sentences[0], pers_pron_form: undefined };
+    return { verbForm: { label, expected: word.target, requiredForms }, sentence };
+  }
+
+  const sentence = word.sentences.find((s) => s.pers_pron_form === label) ?? word.sentences[0];
+  return {
+    verbForm: { label, expected: sentence.target_word_form, requiredForms },
+    sentence,
+  };
+}
 
 const REPEAT_COOLDOWN = 5;
 
@@ -133,7 +166,20 @@ export function useSession(options: Options = {}) {
       const correctIdx = Math.floor(Math.random() * pickPool.length);
       const chosenWord = pickPool[correctIdx];
       const chosenProgress = pool.find((wp) => wp.wordId === chosenWord.id)!;
-      const sentenceIndex = chosenProgress.sentenceIndex % chosenWord.sentences.length;
+
+      // Verbs still climbing to mastery at level 5 must type every
+      // conjugation form at least once — pick the next outstanding one and
+      // align the displayed sentence with it. Due reviews (state ===
+      // "mastered") skip this and use the normal rotation below.
+      let sentence: Sentence;
+      let verbForm: VerbFormContext | undefined;
+      if (chosenWord.kind === "verb" && chosenProgress.level === 5 && chosenProgress.state === "active") {
+        const picked = pickVerbForm(chosenWord, chosenProgress);
+        sentence = picked.sentence;
+        verbForm = picked.verbForm;
+      } else {
+        sentence = chosenWord.sentences[chosenProgress.sentenceIndex % chosenWord.sentences.length];
+      }
 
       cache.history.push(chosenWord.id);
       if (cache.history.length > 50) cache.history = cache.history.slice(-50);
@@ -153,9 +199,10 @@ export function useSession(options: Options = {}) {
         setActiveCount(activeList.length);
         setData({
           word: chosenWord,
-          sentence: chosenWord.sentences[sentenceIndex],
+          sentence,
           progress: chosenProgress,
           answerArray,
+          verbForm,
         });
       }
     } catch (error) {
@@ -164,11 +211,11 @@ export function useSession(options: Options = {}) {
   }, [difficultOnly]);
 
   const applyAndAdvance = useCallback(
-    (updater: (wp: WordProgress) => WordProgress) => {
+    (updater: (wp: WordProgress, verbForm?: VerbFormContext) => WordProgress) => {
       if (!data || !cache.progress) return;
 
       const oldWp = cache.progress[data.progress.wordId];
-      const updated = updater(oldWp);
+      const updated = updater(oldWp, data.verbForm);
       cache.progress = { ...cache.progress, [updated.wordId]: updated };
 
       // Add a new word when leveling up (up to maxStackSize) — but only for

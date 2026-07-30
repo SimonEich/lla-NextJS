@@ -46,7 +46,13 @@ npx serve out
   and auto-submits it — only rendered when the browser actually supports
   `SpeechRecognition`/`webkitSpeechRecognition` (no Firefox support, spotty on
   iOS Safari), and fails gracefully (denied mic permission, no speech, etc.)
-  without affecting the text-input path.
+  without affecting the text-input path. For verbs specifically, L5 doesn't
+  just repeat the infinitive 3x — `WordProgress.formsDone` tracks which of
+  the infinitive + 6 person conjugations have been typed correctly at least
+  once (`progressService.getRequiredVerbForms`), rotating through whatever's
+  still outstanding (`useSession`'s `pickVerbForm`) and only mastering once
+  every form has been covered. Non-verb kinds are unaffected and keep the
+  original 3-correct-answers-in-a-row rule.
 - **Words dataset**: `src/data/words.ts` is the hand-edited source (typed,
   split into chunks so `tsc` can still check a 3000-entry literal). It is
   **not** imported by the app at runtime — `predev`/`prebuild` run

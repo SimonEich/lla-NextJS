@@ -22,11 +22,14 @@ export function FreeInput({ data, onAnswer }: Props) {
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [micError, setMicError] = useState<string | null>(null);
   const { supported: micSupported, listening, start, stop } = useSpeechRecognition("es-ES");
-  const { word } = data;
+  const { word, verbForm } = data;
+  // Verbs at level 5 test one specific conjugation form at a time (see
+  // useSession's pickVerbForm) instead of always the infinitive.
+  const expectedAnswer = verbForm?.expected ?? word.target;
 
   function submitAnswer(value: string) {
     if (result || !value.trim()) return;
-    const isCorrect = fuzzyMatch(value, word.target);
+    const isCorrect = fuzzyMatch(value, expectedAnswer);
     setResult(isCorrect ? "correct" : "wrong");
     setTimeout(() => {
       setInput("");
@@ -68,6 +71,11 @@ export function FreeInput({ data, onAnswer }: Props) {
       <Card>
         <p className="px-5 pt-7 text-center text-sm text-muted-2">Wie heißt das auf Spanisch?</p>
         <p className="px-5 py-6 text-center text-5xl font-bold text-ink">{word.native}</p>
+        {verbForm && (
+          <span className="mb-6 rounded-full bg-[#f0f0f0] px-3 py-1 text-xs font-semibold text-muted">
+            {verbForm.label === "infinitivo" ? "Infinitiv" : `Form: ${verbForm.label}`}
+          </span>
+        )}
       </Card>
 
       <div className="flex flex-col gap-3">
@@ -95,7 +103,7 @@ export function FreeInput({ data, onAnswer }: Props) {
                 : "border-border bg-white text-ink"
             }`}
           >
-            {listening ? "🎤 Höre zu…" : "🎤 Sprechen"}
+            {listening ? "🎤 Höre zu… (Español)" : "🎤 Sprechen (Español)"}
           </button>
         )}
 

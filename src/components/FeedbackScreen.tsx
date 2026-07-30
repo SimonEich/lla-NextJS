@@ -27,7 +27,7 @@ export default function FeedbackScreen({
   const cardRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ startX: 0, startY: 0, dx: 0, dy: 0, active: false });
   const [springBack, setSpringBack] = useState(false);
-  const { sentence, word, progress } = data;
+  const { sentence, word, progress, verbForm } = data;
 
   function applyTransform(dx: number, dy: number) {
     const card = cardRef.current;
@@ -114,7 +114,10 @@ export default function FeedbackScreen({
         {/* Level info */}
         <div className="mt-1 flex flex-col items-center gap-0.5">
           <p className="text-sm text-muted-3">
-            Level {progress.level} · {progress.correctCount}/3 richtig
+            Level {progress.level} ·{" "}
+            {verbForm
+              ? `${(progress.formsDone ?? []).length}/${verbForm.requiredForms.length} Formen`
+              : `${progress.correctCount}/3 richtig`}
           </p>
           <p className="text-[11px] text-[#ccc]">{activeCount} Wörter im Stapel</p>
         </div>
