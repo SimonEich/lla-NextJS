@@ -98,6 +98,33 @@ export default function SettingsScreen() {
               </button>
             </div>
 
+            {/* Fuzzy matching */}
+            <div className="flex flex-col gap-3 rounded-[20px] bg-white p-5 shadow-[0_3px_10px_rgba(0,0,0,0.05)]">
+              <p className="text-xs font-bold tracking-wide text-muted-2">TIPPFEHLER-TOLERANZ</p>
+              <p className="text-sm leading-5 text-[#666]">
+                Wenn aktiviert, werden bei Level 5 kleine Tippfehler toleriert. Wenn deaktiviert,
+                muss die Antwort exakt stimmen.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  handleSave({ ...settings, fuzzyMatchingEnabled: !settings.fuzzyMatchingEnabled })
+                }
+                className={`flex items-center justify-between rounded-2xl border-[1.5px] px-4 py-3.5 ${
+                  settings.fuzzyMatchingEnabled ? "border-brand bg-correct-bg" : "border-border bg-white"
+                }`}
+              >
+                <span className="text-[15px] font-semibold text-ink">Fuzzy-Matching</span>
+                <span
+                  className={`flex h-7 w-12 shrink-0 items-center rounded-full px-0.5 transition-colors ${
+                    settings.fuzzyMatchingEnabled ? "justify-end bg-brand" : "justify-start bg-[#ddd]"
+                  }`}
+                >
+                  <span className="h-6 w-6 rounded-full bg-white shadow" />
+                </span>
+              </button>
+            </div>
+
             {saved && (
               <div className="rounded-xl bg-correct-bg p-3.5 text-center">
                 <p className="font-bold text-brand">Gespeichert ✓</p>

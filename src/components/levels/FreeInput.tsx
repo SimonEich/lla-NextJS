@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MultiData } from "@/types/session";
 import { Card } from "@/components/ui/Card";
 import { fuzzyMatch } from "@/utils/fuzzy";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { settingsService } from "@/services/settingsService";
 
 type Props = {
   data: MultiData;
@@ -21,15 +22,22 @@ export function FreeInput({ data, onAnswer }: Props) {
   const [input, setInput] = useState("");
   const [result, setResult] = useState<"correct" | "wrong" | null>(null);
   const [micError, setMicError] = useState<string | null>(null);
+  const [fuzzyEnabled, setFuzzyEnabled] = useState(true);
   const { supported: micSupported, listening, start, stop } = useSpeechRecognition("es-ES");
   const { word, verbForm } = data;
   // Verbs at level 5 test one specific conjugation form at a time (see
   // useSession's pickVerbForm) instead of always the infinitive.
   const expectedAnswer = verbForm?.expected ?? word.target;
 
+  useEffect(() => {
+    settingsService.load().then((s) => setFuzzyEnabled(s.fuzzyMatchingEnabled));
+  }, []);
+
   function submitAnswer(value: string) {
     if (result || !value.trim()) return;
-    const isCorrect = fuzzyMatch(value, expectedAnswer);
+    const isCorrect = fuzzyEnabled
+      ? fuzzyMatch(value, expectedAnswer)
+      : value.trim().toLowerCase() === expectedAnswer.trim().toLowerCase();
     setResult(isCorrect ? "correct" : "wrong");
     setTimeout(() => {
       setInput("");

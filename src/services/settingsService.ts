@@ -5,11 +5,15 @@ export type AppSettings = {
   // When off, mastered/review words never resurface in a normal learning
   // session — only words that aren't mastered yet are shown.
   spacedRepetitionEnabled: boolean;
+  // When off, level 5 requires an exact match instead of tolerating small
+  // typos.
+  fuzzyMatchingEnabled: boolean;
 };
 
 const DEFAULTS: AppSettings = {
   maxStackSize: 30,
   spacedRepetitionEnabled: true,
+  fuzzyMatchingEnabled: true,
 };
 
 export const settingsService = {

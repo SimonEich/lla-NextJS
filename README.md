@@ -44,7 +44,9 @@ npx serve out
   starter pack, and whichever word gets activated when the stack has room)
   are picked randomly from the untouched pool rather than in dataset order.
 - **Levels**: `src/components/levels/*` — multiple choice (L1–2), fill-in-the-
-  blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5). L5 also
+  blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5) — toggle
+  the "Fuzzy-Matching" setting in `/settings` off to require an exact match
+  instead. L5 also
   offers a "🎤 Sprechen" voice-input option (`src/hooks/useSpeechRecognition.ts`,
   Web Speech API) that transcribes the spoken answer into the same text field
   and auto-submits it — only rendered when the browser actually supports
