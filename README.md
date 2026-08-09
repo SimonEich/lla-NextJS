@@ -56,7 +56,13 @@ npx serve out
   once (`progressService.getRequiredVerbForms`), rotating through whatever's
   still outstanding (`useSession`'s `pickVerbForm`) and only mastering once
   every form has been covered. Non-verb kinds are unaffected and keep the
-  original 3-correct-answers-in-a-row rule.
+  original 3-correct-answers-in-a-row rule. Swiping "Einfach" (easy/up) at
+  level 5 always masters the word immediately, even a verb with forms still
+  outstanding — a deliberate override for "I clearly know this, stop
+  asking." Conversely, 3 wrong answers in a row at any level drop the word
+  back a level (`WordProgress.wrongCount`, reset by any correct answer) —
+  a struggling word gets easier instead of grinding at a level it isn't
+  ready for.
 - **Words dataset**: `src/data/words.ts` is the hand-edited source (typed,
   split into chunks so `tsc` can still check a 3000-entry literal). It is
   **not** imported by the app at runtime — `predev`/`prebuild` run

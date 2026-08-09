@@ -16,6 +16,9 @@ export type WordProgress = {
   // already been typed correctly at least once. Cleared whenever the word
   // leaves level 5 without mastering (lapse) or is (re-)sent there fresh.
   formsDone?: string[];
+  // Consecutive wrong answers since the last correct one. Reaching
+  // WRONG_STREAK_LIMIT drops the word a level and resets this to 0.
+  wrongCount?: number;
 };
 
 // The form currently being tested at level 5 for a verb — computed by
@@ -32,6 +35,7 @@ export const INFINITIVE_FORM = "infinitivo";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const INITIAL_REVIEW_DAYS = 1;
 const MAX_REVIEW_DAYS = 90;
+const WRONG_STREAK_LIMIT = 3;
 
 function scheduleReview(
   days: number,
@@ -68,12 +72,13 @@ function applyVerbFormProgress(
       formsDone,
       level: 5,
       correctCount: 0,
+      wrongCount: 0,
       sentenceIndex: wp.sentenceIndex + 1,
       state: "mastered",
       ...scheduleReview(INITIAL_REVIEW_DAYS),
     };
   }
-  return { ...wp, formsDone, sentenceIndex: wp.sentenceIndex + 1 };
+  return { ...wp, formsDone, wrongCount: 0, sentenceIndex: wp.sentenceIndex + 1 };
 }
 
 export const progressService = {
@@ -90,6 +95,7 @@ export const progressService = {
       wordId,
       level: 1,
       correctCount: 0,
+      wrongCount: 0,
       sentenceIndex: 0,
       difficult: false,
       state: "inactive",
@@ -120,6 +126,7 @@ export const progressService = {
     const base: WordProgress = {
       ...wp,
       correctCount: levelUp ? 0 : newCount,
+      wrongCount: 0,
       level: mastered ? 5 : newLevel,
       sentenceIndex: wp.sentenceIndex + 1,
       state: mastered ? "mastered" : "active",
@@ -136,6 +143,7 @@ export const progressService = {
         state: "active",
         level: 1,
         correctCount: 0,
+        wrongCount: 0,
         sentenceIndex: wp.sentenceIndex + 1,
         formsDone: [],
         nextReviewAt: undefined,
@@ -143,38 +151,51 @@ export const progressService = {
       };
     }
     // A wrong answer doesn't credit the tested form — it stays outstanding
-    // and will be asked again in rotation.
+    // and will be asked again in rotation. After WRONG_STREAK_LIMIT wrong
+    // answers in a row, drop the word a level instead of leaving it stuck.
+    const newWrongCount = (wp.wrongCount ?? 0) + 1;
+    const levelDown = newWrongCount >= WRONG_STREAK_LIMIT;
     return {
       ...wp,
       correctCount: 0,
+      wrongCount: levelDown ? 0 : newWrongCount,
+      level: levelDown ? Math.max(1, wp.level - 1) : wp.level,
       sentenceIndex: wp.sentenceIndex + 1,
+      formsDone: levelDown ? [] : wp.formsDone,
     };
   },
 
-  markFastForward(wp: WordProgress, verbForm?: VerbFormContext): WordProgress {
+  markFastForward(wp: WordProgress): WordProgress {
     if (wp.state === "mastered") {
       // "Easy" on a review — an even stronger recall signal than a plain
       // correct answer, so push the interval out further.
       return { ...wp, ...scheduleReview((wp.reviewInterval ?? INITIAL_REVIEW_DAYS) * 3) };
     }
 
-    // "Easy" on a verb's level-5 form is just as much a demonstration of
-    // knowing it as a plain correct answer — credit the same way, rather
-    // than instantly mastering and skipping the remaining forms.
-    const verbResult = applyVerbFormProgress(wp, verbForm);
-    if (verbResult) return verbResult;
+    if (wp.level >= 5) {
+      // "Easy" at level 5 is a deliberate override — the user is saying
+      // they know it well enough to master right now, without needing
+      // every verb form typed first.
+      return {
+        ...wp,
+        level: 5,
+        correctCount: 0,
+        wrongCount: 0,
+        sentenceIndex: wp.sentenceIndex + 1,
+        state: "mastered",
+        difficult: false,
+        ...scheduleReview(INITIAL_REVIEW_DAYS),
+      };
+    }
 
-    const newLevel = wp.level + 1;
-    const mastered = newLevel > 5;
-    const base: WordProgress = {
+    return {
       ...wp,
-      level: mastered ? 5 : newLevel,
+      level: wp.level + 1,
       correctCount: 0,
+      wrongCount: 0,
       sentenceIndex: wp.sentenceIndex + 1,
-      state: mastered ? "mastered" : "active",
       difficult: false,
     };
-    return mastered ? { ...base, ...scheduleReview(INITIAL_REVIEW_DAYS) } : base;
   },
 
   markDifficult(wp: WordProgress): WordProgress {
@@ -186,6 +207,7 @@ export const progressService = {
         state: "active",
         level: 1,
         correctCount: 0,
+        wrongCount: 0,
         sentenceIndex: wp.sentenceIndex + 1,
         difficult: true,
         formsDone: [],
@@ -210,6 +232,7 @@ export const progressService = {
       ...wp,
       level: 5,
       correctCount: 0,
+      wrongCount: 0,
       sentenceIndex: wp.sentenceIndex + 1,
       difficult: false,
       state: "active",
@@ -225,6 +248,7 @@ export const progressService = {
       wordId,
       level: 5,
       correctCount: 0,
+      wrongCount: 0,
       sentenceIndex: 0,
       difficult: false,
       state: "mastered",
@@ -258,6 +282,7 @@ export const progressService = {
         state: "active",
         level: 1,
         correctCount: 0,
+        wrongCount: 0,
         sentenceIndex: 0,
         difficult: false,
         formsDone: [],
