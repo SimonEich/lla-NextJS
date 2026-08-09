@@ -38,7 +38,11 @@ npx serve out
   transitions per swipe) + `src/hooks/useSession.ts` (session/session cache,
   word activation, stack growth). Mastered words (whether reached through
   practice, the "Kenne ich schon" quick-skip, or `/words`) get scheduled for
-  review and resurface in normal learning sessions once due.
+  review and resurface in normal learning sessions once due — unless the
+  "Spaced Repetition" toggle in `/settings` is off, in which case training
+  only ever shows words that aren't mastered yet. New words (the initial
+  starter pack, and whichever word gets activated when the stack has room)
+  are picked randomly from the untouched pool rather than in dataset order.
 - **Levels**: `src/components/levels/*` — multiple choice (L1–2), fill-in-the-
   blank (L3), tap-the-word (L4), free-text with fuzzy matching (L5). L5 also
   offers a "🎤 Sprechen" voice-input option (`src/hooks/useSpeechRecognition.ts`,
@@ -61,6 +65,13 @@ npx serve out
   ~3MB array into every route's JS. If you edit `words.ts`, just re-run `npm
   run dev`/`build` (or `npx tsx scripts/generate-words-json.ts` directly) to
   regenerate it — `public/words.json` is gitignored.
+- **Word list & detail**: `/words` lists every word with search/filters and
+  a mark-as-known toggle; tapping a row (not the toggle) opens
+  `/words/detail?id=<wordId>`, showing every example sentence for that word.
+  That's a query param rather than a `/words/[id]` dynamic segment on
+  purpose — static export would need `generateStaticParams` to pre-render a
+  page per word (3000+ and growing), whereas this route stays a single
+  static page that resolves the id client-side like everything else here.
 
 ## PWA / offline
 

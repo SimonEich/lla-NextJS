@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 type Props = {
   title: string;
   backLabel?: string;
+  backHref?: string;
 };
 
-export function AppHeader({ title, backLabel = "Start" }: Props) {
+export function AppHeader({ title, backLabel = "Start", backHref = "/" }: Props) {
   const router = useRouter();
 
   return (
@@ -15,7 +16,7 @@ export function AppHeader({ title, backLabel = "Start" }: Props) {
       <div className="relative flex h-14 w-full items-center justify-center px-2">
         <button
           type="button"
-          onClick={() => router.push("/")}
+          onClick={() => router.push(backHref)}
           className="absolute left-1 flex items-center gap-0.5 px-2 py-2 text-brand"
           aria-label={`Zurück zu ${backLabel}`}
         >

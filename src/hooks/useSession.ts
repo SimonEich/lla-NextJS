@@ -10,7 +10,7 @@ import {
 import { progressRepo, wordsRepo } from "@/repositories";
 import { statsService } from "@/services/statsService";
 import { settingsService } from "@/services/settingsService";
-import { buildAnswerArray } from "@/utils/random";
+import { buildAnswerArray, sampleWords } from "@/utils/random";
 import { MultiData } from "@/types/session";
 import { Word, Sentence } from "@/data/words";
 
@@ -50,6 +50,7 @@ const cache = {
   words: null as Word[] | null,
   wordMap: null as Map<string, Word> | null,
   maxStackSize: 30,
+  spacedRepetitionEnabled: true,
   // Most recently asked word ids, most recent last — used so a word only
   // reappears after at least REPEAT_COOLDOWN other words have been asked.
   history: [] as string[],
@@ -68,6 +69,7 @@ async function ensureLoaded() {
     cache.progress = await progressRepo.load();
     const settings = await settingsService.load();
     cache.maxStackSize = settings.maxStackSize;
+    cache.spacedRepetitionEnabled = settings.spacedRepetitionEnabled;
 
     // Backfill review scheduling for words mastered before spaced
     // repetition existed (or marked "known" directly), so they don't get
@@ -87,7 +89,8 @@ async function ensureLoaded() {
 
     const active = progressService.getActive(cache.progress!);
     if (active.length < 10) {
-      const starter = cache.words.slice(0, 10);
+      const untouched = cache.words.filter((w) => !cache.progress![w.id]);
+      const starter = sampleWords(untouched, 10 - active.length);
       starter.forEach((w) => {
         cache.progress = progressService.activate(cache.progress!, w.id);
       });
@@ -125,8 +128,11 @@ export function useSession(options: Options = {}) {
 
       const activeList = progressService.getActive(progress);
       // Mastered words whose review date has arrived resurface alongside
-      // the active stack in a normal learning session.
-      const dueReviews = difficultOnly ? [] : progressService.getDueReviews(progress);
+      // the active stack in a normal learning session — unless spaced
+      // repetition is turned off, in which case only non-mastered words
+      // ever show up in training.
+      const dueReviews =
+        difficultOnly || !cache.spacedRepetitionEnabled ? [] : progressService.getDueReviews(progress);
 
       let pool: WordProgress[];
       if (difficultOnly) {
@@ -227,7 +233,8 @@ export function useSession(options: Options = {}) {
         const currentActive = progressService.getActive(cache.progress).length;
         if (currentActive < cache.maxStackSize) {
           const inProgress = new Set(Object.keys(cache.progress));
-          const nextWord = cache.words.find((w) => !inProgress.has(w.id));
+          const untouched = cache.words.filter((w) => !inProgress.has(w.id));
+          const nextWord = untouched[Math.floor(Math.random() * untouched.length)];
           if (nextWord) {
             cache.progress = progressService.activate(cache.progress, nextWord.id);
           }

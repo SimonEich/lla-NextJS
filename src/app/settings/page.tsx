@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { settingsService, AppSettings } from "@/services/settingsService";
+import { invalidateProgressCache } from "@/hooks/useSession";
 
 const STACK_OPTIONS = [5, 10, 15, 20, 30, 40, 50];
 
@@ -17,6 +18,9 @@ export default function SettingsScreen() {
   async function handleSave(next: AppSettings) {
     setSettings(next);
     await settingsService.save(next);
+    // A learning session may already be running with the old settings
+    // cached in memory — force it to reload them on its next run.
+    invalidateProgressCache();
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   }
@@ -62,6 +66,36 @@ export default function SettingsScreen() {
                 })}
               </div>
               <p className="text-[13px] text-muted-2">Aktuell: {settings.maxStackSize} Wörter im Stapel</p>
+            </div>
+
+            {/* Spaced repetition */}
+            <div className="flex flex-col gap-3 rounded-[20px] bg-white p-5 shadow-[0_3px_10px_rgba(0,0,0,0.05)]">
+              <p className="text-xs font-bold tracking-wide text-muted-2">WIEDERHOLUNGEN</p>
+              <p className="text-sm leading-5 text-[#666]">
+                Wenn aktiviert, tauchen gemeisterte Wörter von Zeit zu Zeit wieder im Training auf.
+                Wenn deaktiviert, werden im Training nur Wörter gezeigt, die noch nicht gemeistert
+                sind.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  handleSave({ ...settings, spacedRepetitionEnabled: !settings.spacedRepetitionEnabled })
+                }
+                className={`flex items-center justify-between rounded-2xl border-[1.5px] px-4 py-3.5 ${
+                  settings.spacedRepetitionEnabled
+                    ? "border-brand bg-correct-bg"
+                    : "border-border bg-white"
+                }`}
+              >
+                <span className="text-[15px] font-semibold text-ink">Spaced Repetition</span>
+                <span
+                  className={`flex h-7 w-12 shrink-0 items-center rounded-full px-0.5 transition-colors ${
+                    settings.spacedRepetitionEnabled ? "justify-end bg-brand" : "justify-start bg-[#ddd]"
+                  }`}
+                >
+                  <span className="h-6 w-6 rounded-full bg-white shadow" />
+                </span>
+              </button>
             </div>
 
             {saved && (

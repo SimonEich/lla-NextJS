@@ -2,10 +2,14 @@ const KEY = "app_settings";
 
 export type AppSettings = {
   maxStackSize: number; // 5–50
+  // When off, mastered/review words never resurface in a normal learning
+  // session — only words that aren't mastered yet are shown.
+  spacedRepetitionEnabled: boolean;
 };
 
 const DEFAULTS: AppSettings = {
   maxStackSize: 30,
+  spacedRepetitionEnabled: true,
 };
 
 export const settingsService = {

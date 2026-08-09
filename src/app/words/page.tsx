@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { progressRepo, wordsRepo } from "@/repositories";
 import { progressService, WordProgress } from "@/services/progressService";
@@ -34,6 +35,7 @@ function statusOf(wp: WordProgress | undefined): StatusFilter {
 const PAGE_SIZE = 100;
 
 export default function WordListScreen() {
+  const router = useRouter();
   const [words, setWords] = useState<Word[] | null>(null);
   const [progressMap, setProgressMap] = useState<Record<string, WordProgress>>({});
   const [query, setQuery] = useState("");
@@ -142,7 +144,15 @@ export default function WordListScreen() {
               return (
                 <div
                   key={w.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => router.push(`/words/detail?id=${w.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    router.push(`/words/detail?id=${w.id}`);
+                  }}
+                  className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -155,7 +165,10 @@ export default function WordListScreen() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => toggleKnown(w.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleKnown(w.id);
+                    }}
                     aria-label={status === "known" ? "Als ungelernt markieren" : "Als gelernt markieren"}
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[1.5px] text-lg ${
                       status === "known"

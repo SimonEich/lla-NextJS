@@ -53,3 +53,16 @@ export function buildAnswerArray(correct: Word, d1: Word, d2: Word): Word[] {
   }
   return arr;
 }
+
+// Picks up to `n` random, non-repeating words — e.g. for seeding a fresh
+// starter pack — without mutating or depending on the order of `words`.
+export function sampleWords(words: Word[], n: number): Word[] {
+  const pool = [...words];
+  const sample: Word[] = [];
+  for (let i = 0; i < n && pool.length > 0; i++) {
+    const j = Math.floor(Math.random() * pool.length);
+    sample.push(pool[j]);
+    pool.splice(j, 1);
+  }
+  return sample;
+}
