@@ -7,6 +7,7 @@ type Props = {
   data: MultiData;
   isCorrect: boolean;
   activeCount: number;
+  userAnswer?: string;
   onSwipeRight: () => void;
   onSwipeUp: () => void;
   onSwipeLeft: () => void;
@@ -19,6 +20,7 @@ export default function FeedbackScreen({
   data,
   isCorrect,
   activeCount,
+  userAnswer,
   onSwipeRight,
   onSwipeUp,
   onSwipeLeft,
@@ -95,6 +97,10 @@ export default function FeedbackScreen({
         >
           {isCorrect ? "Richtig ✓" : "Falsch ✗"}
         </span>
+
+        {/* What the user actually typed/spoke, so they can double-check it
+            against the correct answer below */}
+        {userAnswer && <p className="-mt-1 text-xs text-muted-2">Deine Antwort: {userAnswer}</p>}
 
         {/* Word */}
         <p className="text-4xl font-extrabold text-ink">{word.native}</p>

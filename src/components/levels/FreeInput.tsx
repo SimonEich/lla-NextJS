@@ -8,7 +8,7 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 type Props = {
   data: MultiData;
-  onAnswer: (correct: boolean) => void;
+  onAnswer: (correct: boolean, typedAnswer?: string) => void;
 };
 
 const MIC_ERROR_MESSAGES: Record<string, string> = {
@@ -34,7 +34,7 @@ export function FreeInput({ data, onAnswer }: Props) {
     setTimeout(() => {
       setInput("");
       setResult(null);
-      onAnswer(isCorrect);
+      onAnswer(isCorrect, value);
     }, 200);
   }
 

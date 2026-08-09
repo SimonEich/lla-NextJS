@@ -32,6 +32,14 @@ function statusOf(wp: WordProgress | undefined): StatusFilter {
   return "active";
 }
 
+// "Gemeistert" is more meaningful than "Level 5" once a word is mastered —
+// the level number only matters while still actively climbing toward that.
+function levelLabel(wp: WordProgress | undefined): string | null {
+  if (!wp || wp.state === "inactive") return null;
+  if (wp.state === "mastered") return "Gemeistert";
+  return `Level ${wp.level}`;
+}
+
 const PAGE_SIZE = 100;
 
 export default function WordListScreen() {
@@ -141,6 +149,7 @@ export default function WordListScreen() {
           <div className="flex flex-col gap-2">
             {visible.map((w) => {
               const status = statusOf(progressMap[w.id]);
+              const level = levelLabel(progressMap[w.id]);
               return (
                 <div
                   key={w.id}
@@ -160,6 +169,11 @@ export default function WordListScreen() {
                       <span className="shrink-0 rounded-full bg-[#f0f0f0] px-2 py-0.5 text-[10px] font-medium text-muted-2">
                         {KIND_LABELS[w.kind]}
                       </span>
+                      {level && (
+                        <span className="shrink-0 rounded-full bg-correct-bg px-2 py-0.5 text-[10px] font-semibold text-brand">
+                          {level}
+                        </span>
+                      )}
                     </div>
                     <p className="truncate text-sm text-muted">{w.target}</p>
                   </div>

@@ -15,9 +15,11 @@ export default function DifficultScreen() {
     useSession({ difficultOnly: true });
   const [phase, setPhase] = useState<Phase>("question");
   const [isCorrect, setIsCorrect] = useState(false);
+  const [userAnswer, setUserAnswer] = useState<string | undefined>(undefined);
 
-  function handleAnswer(correct: boolean) {
+  function handleAnswer(correct: boolean, typedAnswer?: string) {
     setIsCorrect(correct);
+    setUserAnswer(typedAnswer);
     setPhase("feedback");
   }
 
@@ -51,6 +53,7 @@ export default function DifficultScreen() {
           data={data}
           isCorrect={isCorrect}
           activeCount={activeCount}
+          userAnswer={userAnswer}
           onSwipeRight={() => handleSwipe(swipeRight)}
           onSwipeUp={() => handleSwipe(swipeUp)}
           onSwipeLeft={() => handleSwipe(swipeLeft)}

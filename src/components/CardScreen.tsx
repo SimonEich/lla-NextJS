@@ -6,7 +6,7 @@ import { FreeInput } from "./levels/FreeInput";
 
 type Props = {
   data: MultiData;
-  onAnswer: (correct: boolean) => void;
+  onAnswer: (correct: boolean, typedAnswer?: string) => void;
   activeCount: number;
   onKnown?: () => void;
 };
