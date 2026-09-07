@@ -114,7 +114,7 @@ export default function HomeScreen() {
             onClick={() => router.push("/exam")}
             className="rounded-[18px] border-[1.5px] border-border bg-white py-4 text-base font-semibold text-ink"
           >
-            Alle Wörter prüfen · {stats.examPoolWords}
+            Alle Wörter prüfen
           </button>
         )}
 
