@@ -139,12 +139,16 @@ export function useSession(options: Options = {}) {
 
       let pool: WordProgress[];
       if (examMode) {
-        // A single quick pass through the current active stack only — not
-        // due reviews (already mastered) and not words already flagged
-        // "pending" from an earlier exam pass (those only come back once
-        // normal training reactivates them). Keeps this a fast "where do I
-        // stand right now" check rather than an endless re-grind.
-        pool = activeList.filter((wp) => wp.state === "active");
+        // Every word in the whole vocabulary that isn't mastered yet —
+        // including ones never touched (no progress record at all, i.e.
+        // "no level" — a fresh install starts with all 3000 here). This is
+        // a broad self-assessment, not limited to the current training
+        // stack: words without a real record get a default in-memory one
+        // so the round can still render; applyAndAdvance persists it on
+        // the first swipe.
+        pool = cache.words!
+          .filter((w) => progress[w.id]?.state !== "mastered")
+          .map((w) => progress[w.id] ?? progressService.getDefault(w.id));
         if (pool.length === 0) {
           if (isMounted.current) setEmpty(true);
           return;
@@ -241,7 +245,10 @@ export function useSession(options: Options = {}) {
     (updater: (wp: WordProgress, verbForm?: VerbFormContext) => WordProgress) => {
       if (!data || !cache.progress) return;
 
-      const oldWp = cache.progress[data.progress.wordId];
+      // Exam mode may hand back a round for a word with no real progress
+      // record yet (never touched before) — data.progress is the default
+      // that was built in-memory for it in that case.
+      const oldWp = cache.progress[data.progress.wordId] ?? data.progress;
       const updated = updater(oldWp, data.verbForm);
       cache.progress = { ...cache.progress, [updated.wordId]: updated };
 
