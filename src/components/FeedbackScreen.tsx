@@ -8,15 +8,14 @@ type Props = {
   isCorrect: boolean;
   activeCount: number;
   userAnswer?: string;
-  onSwipeRight?: () => void;
-  onSwipeUp?: () => void;
-  onSwipeLeft?: () => void;
-  onSwipeDown?: () => void;
-  // Exam mode ("Alle Wörter prüfen"): the outcome is decided automatically
-  // by whether the typed answer was correct, not by a manual swipe choice —
-  // so instead of swipe gestures this just shows a single continue button.
+  onSwipeRight: () => void;
+  onSwipeUp: () => void;
+  onSwipeLeft: () => void;
+  onSwipeDown: () => void;
+  // Exam mode ("Alle Wörter prüfen") only changes the "X Wörter ..." label —
+  // the swipe gestures behave exactly like every other mode (right/up master
+  // the word outright, left/down mark it "pending"); see exam/page.tsx.
   examMode?: boolean;
-  onContinue?: () => void;
 };
 
 const SWIPE_THRESHOLD = 60;
@@ -31,7 +30,6 @@ export default function FeedbackScreen({
   onSwipeLeft,
   onSwipeDown,
   examMode,
-  onContinue,
 }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const drag = useRef({ startX: 0, startY: 0, dx: 0, dy: 0, active: false });
@@ -46,7 +44,6 @@ export default function FeedbackScreen({
   }
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (examMode) return;
     drag.current = { startX: e.clientX, startY: e.clientY, dx: 0, dy: 0, active: true };
     setSpringBack(false);
     try {
@@ -76,11 +73,11 @@ export default function FeedbackScreen({
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
     if (absDx > absDy && absDx > SWIPE_THRESHOLD) {
-      if (dx > 0) onSwipeRight?.();
-      else onSwipeLeft?.();
+      if (dx > 0) onSwipeRight();
+      else onSwipeLeft();
     } else if (absDy > absDx && absDy > SWIPE_THRESHOLD) {
-      if (dy < 0) onSwipeUp?.();
-      else onSwipeDown?.();
+      if (dy < 0) onSwipeUp();
+      else onSwipeDown();
     }
   }
 
@@ -141,29 +138,17 @@ export default function FeedbackScreen({
             {activeCount} Wörter {examMode ? "übrig" : "im Stapel"}
           </p>
         </div>
-
-        {examMode && (
-          <button
-            type="button"
-            onClick={onContinue}
-            className="mt-2 w-full rounded-2xl bg-ink py-3.5 text-base font-bold text-white"
-          >
-            Weiter
-          </button>
-        )}
       </div>
 
       {/* Swipe hints */}
-      {!examMode && (
-        <div className="absolute bottom-6 flex items-center gap-4 text-sm text-[#666] opacity-50">
-          <span>← Falsch</span>
-          <div className="flex gap-3">
-            <span>↑ Einfach</span>
-            <span>→ Gewusst</span>
-            <span>↓ Schwer</span>
-          </div>
+      <div className="absolute bottom-6 flex items-center gap-4 text-sm text-[#666] opacity-50">
+        <span>← Falsch</span>
+        <div className="flex gap-3">
+          <span>↑ Einfach</span>
+          <span>→ Gewusst</span>
+          <span>↓ Schwer</span>
         </div>
-      )}
+      </div>
     </div>
   );
 }

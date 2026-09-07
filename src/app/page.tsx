@@ -108,13 +108,13 @@ export default function HomeScreen() {
           </button>
         )}
 
-        {stats && stats.activeWords > 0 && (
+        {stats && stats.examPoolWords > 0 && (
           <button
             type="button"
             onClick={() => router.push("/exam")}
             className="rounded-[18px] border-[1.5px] border-border bg-white py-4 text-base font-semibold text-ink"
           >
-            Alle Wörter prüfen · {stats.activeWords}
+            Alle Wörter prüfen · {stats.examPoolWords}
           </button>
         )}
 

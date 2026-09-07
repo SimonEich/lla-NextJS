@@ -139,9 +139,12 @@ export function useSession(options: Options = {}) {
 
       let pool: WordProgress[];
       if (examMode) {
-        // Only not-yet-mastered words themselves — due reviews (already
-        // mastered) don't belong in an "exam" of what's still outstanding.
-        pool = activeList;
+        // A single quick pass through the current active stack only — not
+        // due reviews (already mastered) and not words already flagged
+        // "pending" from an earlier exam pass (those only come back once
+        // normal training reactivates them). Keeps this a fast "where do I
+        // stand right now" check rather than an endless re-grind.
+        pool = activeList.filter((wp) => wp.state === "active");
         if (pool.length === 0) {
           if (isMounted.current) setEmpty(true);
           return;
@@ -218,7 +221,9 @@ export function useSession(options: Options = {}) {
 
       if (isMounted.current) {
         setEmpty(false);
-        setActiveCount(activeList.length);
+        // In exam mode, count down the exam pool itself (shrinks as words
+        // get resolved) rather than the whole active+pending stack.
+        setActiveCount(examMode ? pool.length : activeList.length);
         setData({
           word: chosenWord,
           sentence,

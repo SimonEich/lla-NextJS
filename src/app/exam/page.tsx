@@ -22,10 +22,9 @@ export default function ExamScreen() {
     setPhase("feedback");
   }
 
-  function handleContinue() {
+  function handleSwipe(action: () => void) {
     setPhase("question");
-    if (isCorrect) examCorrect();
-    else examWrong();
+    action();
   }
 
   return (
@@ -36,7 +35,7 @@ export default function ExamScreen() {
           <p className="text-5xl">🎉</p>
           <p className="text-xl font-bold text-ink">Nichts zu prüfen</p>
           <p className="text-center text-base text-muted">
-            Es gibt aktuell keine noch nicht gemeisterten Wörter.
+            Es gibt aktuell keine aktiven Wörter zu prüfen.
           </p>
           <button
             type="button"
@@ -57,7 +56,12 @@ export default function ExamScreen() {
           activeCount={activeCount}
           userAnswer={userAnswer}
           examMode
-          onContinue={handleContinue}
+          // Right/up: known well enough → master it outright. Left/down:
+          // not (yet) known → flag it "pending" for a later pass.
+          onSwipeRight={() => handleSwipe(examCorrect)}
+          onSwipeUp={() => handleSwipe(examCorrect)}
+          onSwipeLeft={() => handleSwipe(examWrong)}
+          onSwipeDown={() => handleSwipe(examWrong)}
         />
       ) : (
         <CardScreen data={data} onAnswer={handleAnswer} activeCount={activeCount} examMode />

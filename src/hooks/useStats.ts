@@ -8,6 +8,9 @@ export type AppStats = {
   totalWords: number;
   masteredWords: number;
   activeWords: number;
+  // Strictly "active" words (excludes "pending") — the pool size for a
+  // fresh exam-mode pass, shown on the exam mode CTA.
+  examPoolWords: number;
   difficultWords: number;
   streak: number;
   todayCount: number;
@@ -31,12 +34,14 @@ export function useStats() {
     // words (see progressService.getActive) — count them together so this
     // matches the exam-mode pool size shown on the home screen.
     const active = allProgress.filter((wp) => wp.state === "active" || wp.state === "pending").length;
+    const examPool = allProgress.filter((wp) => wp.state === "active").length;
     const difficult = allProgress.filter((wp) => wp.difficult).length;
 
     setStats({
       totalWords: words.length,
       masteredWords: mastered,
       activeWords: active,
+      examPoolWords: examPool,
       difficultWords: difficult,
       streak: practiceStats.streak,
       todayCount: practiceStats.todayCount,
