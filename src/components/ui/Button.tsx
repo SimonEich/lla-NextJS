@@ -17,9 +17,9 @@ export function Button({ label, onPress, variant = "default" }: Props) {
     <button
       type="button"
       onClick={onPress}
-      className={`h-16 w-full rounded-2xl border-[1.5px] text-lg font-semibold text-ink transition-colors active:scale-[0.98] ${VARIANT_CLASSES[variant]}`}
+      className={`min-h-16 w-full rounded-2xl border-[1.5px] px-4 py-3 text-lg font-semibold text-ink transition-colors active:scale-[0.98] ${VARIANT_CLASSES[variant]}`}
     >
-      {label}
+      <span className="break-words [overflow-wrap:anywhere]">{label}</span>
     </button>
   );
 }

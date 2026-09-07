@@ -27,7 +27,10 @@ export function useStats() {
 
     const allProgress = Object.values(progress);
     const mastered = allProgress.filter((wp) => wp.state === "mastered").length;
-    const active = allProgress.filter((wp) => wp.state === "active").length;
+    // "active" and "pending" are both still-trainable, not-yet-mastered
+    // words (see progressService.getActive) — count them together so this
+    // matches the exam-mode pool size shown on the home screen.
+    const active = allProgress.filter((wp) => wp.state === "active" || wp.state === "pending").length;
     const difficult = allProgress.filter((wp) => wp.difficult).length;
 
     setStats({

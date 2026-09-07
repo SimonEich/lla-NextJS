@@ -32,7 +32,9 @@ export function MultipleChoice({ data, onAnswer }: Props) {
   return (
     <div className="flex flex-1 flex-col justify-between gap-6 bg-app-bg px-5 pt-5 pb-12">
       <Card>
-        <p className="px-5 pt-8 text-center text-5xl font-bold text-ink">{question}</p>
+        <p className="w-full break-words px-5 pt-8 text-center text-[clamp(1.5rem,7vw,3rem)] font-bold text-ink [overflow-wrap:anywhere]">
+          {question}
+        </p>
         <p className="px-5 pt-3 pb-7 text-center text-base text-muted-2">{context}</p>
       </Card>
 

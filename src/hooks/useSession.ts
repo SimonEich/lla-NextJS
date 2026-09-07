@@ -101,10 +101,13 @@ async function ensureLoaded() {
 
 type Options = {
   difficultOnly?: boolean;
+  // Exam mode: quiz every not-yet-mastered word directly at level-5
+  // difficulty (see progressService.markExamCorrect/markExamWrong).
+  examMode?: boolean;
 };
 
 export function useSession(options: Options = {}) {
-  const { difficultOnly = false } = options;
+  const { difficultOnly = false, examMode = false } = options;
   const [data, setData] = useState<MultiData | null>(null);
   const [activeCount, setActiveCount] = useState(0);
   const [empty, setEmpty] = useState(false);
@@ -135,7 +138,15 @@ export function useSession(options: Options = {}) {
         difficultOnly || !cache.spacedRepetitionEnabled ? [] : progressService.getDueReviews(progress);
 
       let pool: WordProgress[];
-      if (difficultOnly) {
+      if (examMode) {
+        // Only not-yet-mastered words themselves — due reviews (already
+        // mastered) don't belong in an "exam" of what's still outstanding.
+        pool = activeList;
+        if (pool.length === 0) {
+          if (isMounted.current) setEmpty(true);
+          return;
+        }
+      } else if (difficultOnly) {
         pool = activeList.filter((wp) => wp.difficult);
         if (pool.length === 0) {
           if (isMounted.current) setEmpty(true);
@@ -155,7 +166,7 @@ export function useSession(options: Options = {}) {
         .map((wp) => wordMap.get(wp.wordId))
         .filter((w): w is Word => !!w);
 
-      const poolData = difficultOnly
+      const poolData = difficultOnly || examMode
         ? pool.map((wp) => wordMap.get(wp.wordId)).filter((w): w is Word => !!w)
         : eligibleData;
 
@@ -179,7 +190,12 @@ export function useSession(options: Options = {}) {
       // "mastered") skip this and use the normal rotation below.
       let sentence: Sentence;
       let verbForm: VerbFormContext | undefined;
-      if (chosenWord.kind === "verb" && chosenProgress.level === 5 && chosenProgress.state === "active") {
+      if (
+        !examMode &&
+        chosenWord.kind === "verb" &&
+        chosenProgress.level === 5 &&
+        chosenProgress.state === "active"
+      ) {
         const picked = pickVerbForm(chosenWord, chosenProgress);
         sentence = picked.sentence;
         verbForm = picked.verbForm;
@@ -214,7 +230,7 @@ export function useSession(options: Options = {}) {
     } catch (error) {
       console.error("[useSession] Error:", error);
     }
-  }, [difficultOnly]);
+  }, [difficultOnly, examMode]);
 
   const applyAndAdvance = useCallback(
     (updater: (wp: WordProgress, verbForm?: VerbFormContext) => WordProgress) => {
@@ -268,6 +284,14 @@ export function useSession(options: Options = {}) {
     () => applyAndAdvance(progressService.jumpToLevel5),
     [applyAndAdvance]
   );
+  const examCorrect = useCallback(
+    () => applyAndAdvance(progressService.markExamCorrect),
+    [applyAndAdvance]
+  );
+  const examWrong = useCallback(
+    () => applyAndAdvance(progressService.markExamWrong),
+    [applyAndAdvance]
+  );
 
   return {
     runSession,
@@ -276,6 +300,8 @@ export function useSession(options: Options = {}) {
     swipeLeft,
     swipeDown,
     jumpToLevel5,
+    examCorrect,
+    examWrong,
     data,
     activeCount,
     empty,

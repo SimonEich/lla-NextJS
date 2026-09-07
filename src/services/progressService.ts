@@ -7,7 +7,12 @@ export type WordProgress = {
   correctCount: number;
   sentenceIndex: number;
   difficult: boolean;
-  state: "inactive" | "active" | "mastered";
+  // "pending" is a third, informational status: a word that failed the
+  // level-5 exam-mode check (see markExamWrong). It's still trainable like
+  // "active" (shows up in normal sessions and exam mode again) — the next
+  // ordinary correct answer flips it back to "active" via markCorrect, or a
+  // later exam pass masters it via markExamCorrect.
+  state: "inactive" | "active" | "mastered" | "pending";
   // Only set while state === "mastered" — when the word is next due for a
   // spaced-repetition review, and how many days the current interval spans.
   nextReviewAt?: number;
@@ -257,6 +262,33 @@ export const progressService = {
     };
   },
 
+  // Exam mode ("Alle Wörter prüfen"): tests every not-yet-mastered word
+  // directly at the level-5 (free-input) difficulty, regardless of its
+  // actual stored level. A correct answer masters the word outright; a
+  // wrong one marks it "pending" instead of touching its level, so the
+  // failure is visible without disturbing normal level-climbing progress.
+  markExamCorrect(wp: WordProgress): WordProgress {
+    return {
+      ...wp,
+      level: 5,
+      correctCount: 0,
+      wrongCount: 0,
+      sentenceIndex: wp.sentenceIndex + 1,
+      state: "mastered",
+      formsDone: [],
+      ...scheduleReview(INITIAL_REVIEW_DAYS),
+    };
+  },
+
+  markExamWrong(wp: WordProgress): WordProgress {
+    return {
+      ...wp,
+      correctCount: 0,
+      sentenceIndex: wp.sentenceIndex + 1,
+      state: "pending",
+    };
+  },
+
   // Mastered words whose review date has arrived — eligible to resurface
   // in a normal learning session alongside the active stack.
   getDueReviews(progress: Record<string, WordProgress>, now: number = Date.now()): WordProgress[] {
@@ -265,9 +297,10 @@ export const progressService = {
     );
   },
 
-  // get all active word progress objects
+  // get all trainable word progress objects — currently being learned
+  // ("active") or awaiting retry after failing an exam check ("pending").
   getActive(progress: Record<string, WordProgress>): WordProgress[] {
-    return Object.values(progress).filter((wp) => wp.state === "active");
+    return Object.values(progress).filter((wp) => wp.state === "active" || wp.state === "pending");
   },
 
   // activate a single word
@@ -292,6 +325,6 @@ export const progressService = {
 
   // count active words
   getActiveCount(progress: Record<string, WordProgress>): number {
-    return Object.values(progress).filter((wp) => wp.state === "active").length;
+    return this.getActive(progress).length;
   },
 };

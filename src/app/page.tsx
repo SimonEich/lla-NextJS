@@ -62,8 +62,8 @@ export default function HomeScreen() {
             <p className="text-[11px] font-medium text-white/70">Tage Serie</p>
           </div>
           <div className="flex flex-1 flex-col items-center gap-1 rounded-2xl bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <p className="text-[22px] font-extrabold text-ink">{stats?.todayCount ?? 0}</p>
-            <p className="text-[11px] font-medium text-muted-2">Heute</p>
+            <p className="text-[22px] font-extrabold text-ink">{stats?.masteredWords ?? 0}</p>
+            <p className="text-[11px] font-medium text-muted-2">Gemeistert</p>
           </div>
         </div>
 
@@ -105,6 +105,16 @@ export default function HomeScreen() {
             className="rounded-[18px] border-[1.5px] border-border bg-white py-4 text-base font-semibold text-ink"
           >
             Schwierige Wörter · {stats.difficultWords}
+          </button>
+        )}
+
+        {stats && stats.activeWords > 0 && (
+          <button
+            type="button"
+            onClick={() => router.push("/exam")}
+            className="rounded-[18px] border-[1.5px] border-border bg-white py-4 text-base font-semibold text-ink"
+          >
+            Alle Wörter prüfen · {stats.activeWords}
           </button>
         )}
 

@@ -17,26 +17,30 @@ const KIND_LABELS: Record<WordKind, string> = {
   phrase: "Phrase",
 };
 
-type StatusFilter = "all" | "new" | "active" | "known";
+type StatusFilter = "all" | "new" | "active" | "pending" | "known";
 
 const FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "all", label: "Alle" },
   { key: "new", label: "Neu" },
   { key: "active", label: "Aktiv" },
+  { key: "pending", label: "Ausstehend" },
   { key: "known", label: "Gelernt" },
 ];
 
 function statusOf(wp: WordProgress | undefined): StatusFilter {
   if (!wp || wp.state === "inactive") return "new";
   if (wp.state === "mastered") return "known";
+  if (wp.state === "pending") return "pending";
   return "active";
 }
 
 // "Gemeistert" is more meaningful than "Level 5" once a word is mastered —
 // the level number only matters while still actively climbing toward that.
+// "Ausstehend" marks a word that failed the level-5 exam-mode check.
 function levelLabel(wp: WordProgress | undefined): string | null {
   if (!wp || wp.state === "inactive") return null;
   if (wp.state === "mastered") return "Gemeistert";
+  if (wp.state === "pending") return "Ausstehend";
   return `Level ${wp.level}`;
 }
 
@@ -170,7 +174,15 @@ export default function WordListScreen() {
                         {KIND_LABELS[w.kind]}
                       </span>
                       {level && (
-                        <span className="shrink-0 rounded-full bg-correct-bg px-2 py-0.5 text-[10px] font-semibold text-brand">
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                            status === "known"
+                              ? "bg-correct-bg text-brand"
+                              : status === "pending"
+                                ? "bg-wrong-bg text-wrong"
+                                : "bg-[#f0f0f0] text-muted-2"
+                          }`}
+                        >
                           {level}
                         </span>
                       )}

@@ -34,7 +34,9 @@ export function FillBlank({ data, onAnswer }: Props) {
     <div className="flex flex-1 flex-col justify-between gap-6 bg-app-bg px-5 pt-5 pb-12">
       <Card flex>
         <p className="mb-4 text-center text-lg text-muted">{sentence.native}</p>
-        <p className="text-center text-3xl font-bold text-ink">{blankSentence}</p>
+        <p className="w-full break-words text-center text-[clamp(1.25rem,5.5vw,1.875rem)] font-bold text-ink [overflow-wrap:anywhere]">
+          {blankSentence}
+        </p>
       </Card>
 
       <div className="flex flex-col gap-3">

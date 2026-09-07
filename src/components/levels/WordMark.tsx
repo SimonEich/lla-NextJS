@@ -86,7 +86,9 @@ export function WordMark({ data, onAnswer }: Props) {
   return (
     <div className="flex flex-1 flex-col bg-app-bg px-5 pt-5 pb-12">
       <Card flex>
-        <p className="mb-2 text-center text-4xl font-bold text-ink">{data.word.native}</p>
+        <p className="mb-2 w-full break-words text-center text-[clamp(1.375rem,6vw,2.25rem)] font-bold text-ink [overflow-wrap:anywhere]">
+          {data.word.native}
+        </p>
         <p className="mb-5 text-center text-sm text-muted-2">Tippe das richtige Wort an</p>
         <div className="flex flex-wrap justify-center gap-2 px-3">
           {tokens.map((token, i) => {
@@ -99,7 +101,7 @@ export function WordMark({ data, onAnswer }: Props) {
                 key={i}
                 type="button"
                 onClick={() => handlePress(i, token.isTarget)}
-                className={`rounded-[10px] px-3.5 py-2.5 text-2xl font-semibold text-ink transition-colors ${bg}`}
+                className={`max-w-full break-words rounded-[10px] px-3.5 py-2.5 text-[clamp(1rem,5vw,1.5rem)] font-semibold text-ink transition-colors [overflow-wrap:anywhere] ${bg}`}
               >
                 {token.text}
               </button>
